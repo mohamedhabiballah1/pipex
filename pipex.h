@@ -22,13 +22,16 @@
 #include<sys/types.h>
 #include<fcntl.h>
 
-typedef struct pipex
-{
+typedef struct pipex {
+    char *first_path;
+    char **paths;
+    char **cmdargs;
+    char *sec_path;
     int fd_in;
     int fd_out;
-    
-};
-
+    pid_t   pid;
+    int end[2];
+}   t_list;
 
 char	**ft_split(char const *s, char c);
 int     ft_strncmp(const char *s1, const char *s2, size_t n);

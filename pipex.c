@@ -1,15 +1,3 @@
-/* ************************************************************************** */
-/*                                                                            */
-/*                                                        :::      ::::::::   */
-/*   pipex.c                                            :+:      :+:    :+:   */
-/*                                                    +:+ +:+         +:+     */
-/*   By: mhabib-a <mhabib-a@student.42.fr>          +#+  +:+       +#+        */
-/*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2022/12/21 11:33:08 by mhabib-a          #+#    #+#             */
-/*   Updated: 2022/12/21 17:50:54 by mhabib-a         ###   ########.fr       */
-/*                                                                            */
-/* ************************************************************************** */
-
 #include"pipex.h"
 
 char    *ft_path(char **env)
@@ -40,23 +28,58 @@ char    *ft_access(char **paths, char **cmd)
     }
     return (NULL);
 }
+void    ft_child(t_list p, char *cmd, char **env)
+{
+    dup2(p.end[1], 1);
+    close(p.end[0]);
+    p.cmdargs = ft_split(cmd, ' ');
+    p.sec_path = ft_access(p.paths, p.cmdargs);
+    execve(p.sec_path, p.cmdargs, env);
+}
 
+void    ft_parent(t_list p, char *cmd, char **env)
+{
+    dup2(p.end[0], 0);
+    close(p.end[1]);
+
+    p.cmdargs = ft_split(cmd, ' ');
+    p.sec_path = ft_access(p.paths, p.cmdargs);
+    execve(p.sec_path, p.cmdargs, env);
+}
 int main(int argc, char **argv, char **env)
 {
-    char *first_path, **paths, **cmdargs, *sec_path;
-    int fd_in, fd_out;
+    t_list  point;
     
-    fd_in = open(argv[1], O_RDONLY);
-    fd_out = open(argv[3], O_CREAT | O_RDWR | O_TRUNC, 0664);
-    dup2(fd_in, 0);
-    dup2(fd_out, 1);
-    first_path = ft_path(env);
-    paths = ft_split(first_path, ':');
-    cmdargs = ft_split(argv[2], ' ');
-    sec_path = ft_access(paths, cmdargs);
-    execve(sec_path, cmdargs, env);
+    point.fd_in = open(argv[1], O_CREAT | O_RDWR);
+    point.fd_out = open(argv[4], O_CREAT | O_RDWR | O_TRUNC , 0664);
+    dup2(point.fd_in, 0);
+    dup2(point.fd_out, 1);
+    pipe(point.end);
+    point.pid = fork();
+
+    point.first_path = ft_path(env);
+    point.paths = ft_split(point.first_path, ':');
+
+    if (point.pid < 0)
+        perror("Error");
+    else if (point.pid > 0)
+        ft_parent(point, argv[2], env);
+    else if (point.pid == 0)
+        ft_child(point, argv[3], env);
+    
+    waitpid(point.pid, NULL, 0);
 }
-    /*int fd_in;
+    /*point.fd_in = open(argv[1], O_RDONLY);
+    point.fd_out = open(argv[3], O_CREAT | O_RDWR | O_TRUNC, 0664);
+    dup2(point.fd_in, 0);
+    dup2(point.fd_out, 1);
+    point.first_path = ft_path(env);
+    point.paths = ft_split(point.first_path, ':');
+    point.cmdargs = ft_split(argv[2], ' ');
+    point.sec_path = ft_access(point.paths, point.cmdargs);
+    execve(point.sec_path, point.cmdargs, env);
+    __________________________________________________________________
+    int fd_in;
     int fd_out;
     char *first_path;
     char **paths;
