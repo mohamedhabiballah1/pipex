@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   pipex.c                                            :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: mhabib-a <mhabib-a@student.42.fr>          +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2022/12/21 11:33:08 by mhabib-a          #+#    #+#             */
+/*   Updated: 2022/12/28 11:16:57 by mhabib-a         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include"pipex.h"
 
 char    *ft_path(char **env)
@@ -15,83 +27,67 @@ char    *ft_access(char **paths, char **cmd)
 {
     char    *str, *str1;
     int i = 0;
-
     while(paths[i])
     {
         str = ft_strjoin(paths[i], "/");
-        str1 = ft_strjoin(str, cmd[0]);
+        str1 = ft_strjoin(str, *cmd);
         free(str);
         if (access(str1, F_OK) == 0)
             return(str1);
         free(str1);
         i++;
     }
+    write(2, "No such file or directory", 26);
     return (NULL);
 }
+
 void    ft_child(t_list p, char *cmd, char **env)
 {
     dup2(p.end[1], 1);
     close(p.end[0]);
-    p.cmdargs = ft_split(cmd, ' ');
-    p.sec_path = ft_access(p.paths, p.cmdargs);
-    execve(p.sec_path, p.cmdargs, env);
+    p.childcmd = ft_split(cmd, ' ');
+    p.child_path = ft_access(p.paths, p.childcmd);
+    execve(p.child_path, p.childcmd, env);
 }
 
 void    ft_parent(t_list p, char *cmd, char **env)
 {
     dup2(p.end[0], 0);
     close(p.end[1]);
-
-    p.cmdargs = ft_split(cmd, ' ');
-    p.sec_path = ft_access(p.paths, p.cmdargs);
-    execve(p.sec_path, p.cmdargs, env);
+    p.parentcmd = ft_split(cmd, ' ');
+    p.parent_path = ft_access(p.paths, p.parentcmd);
+    execve(p.child_path, p.childcmd, env);
 }
-int main(int argc, char **argv, char **env)
+
+void    ft_pipex(char **argv, char **env)
 {
-    t_list  point;
-    
+    t_list point;
+     
     point.fd_in = open(argv[1], O_CREAT | O_RDWR);
     point.fd_out = open(argv[4], O_CREAT | O_RDWR | O_TRUNC , 0664);
+    if (point.fd_in < 0 || point.fd_out < 0)
+        write(2, "FD Error", 9);
     dup2(point.fd_in, 0);
     dup2(point.fd_out, 1);
-    pipe(point.end);
-    point.pid = fork();
-
     point.first_path = ft_path(env);
     point.paths = ft_split(point.first_path, ':');
-
+    pipe(point.end);
+    point.pid = fork();
     if (point.pid < 0)
         perror("Error");
     else if (point.pid > 0)
-        ft_parent(point, argv[2], env);
+        ft_parent(point, argv[3], env);   
     else if (point.pid == 0)
-        ft_child(point, argv[3], env);
-    
-    waitpid(point.pid, NULL, 0);
+        ft_child(point, argv[2], env);
+    waitpid(point.pid, NULL ,0);
 }
-    /*point.fd_in = open(argv[1], O_RDONLY);
-    point.fd_out = open(argv[3], O_CREAT | O_RDWR | O_TRUNC, 0664);
-    dup2(point.fd_in, 0);
-    dup2(point.fd_out, 1);
-    point.first_path = ft_path(env);
-    point.paths = ft_split(point.first_path, ':');
-    point.cmdargs = ft_split(argv[2], ' ');
-    point.sec_path = ft_access(point.paths, point.cmdargs);
-    execve(point.sec_path, point.cmdargs, env);
-    __________________________________________________________________
-    int fd_in;
-    int fd_out;
-    char *first_path;
-    char **paths;
-    char **cmdargs;
-    char *sec_path;
+
+int main(int argc, char **argv, char **env)
+{
     
-    fd_in = open(argv[1], O_RDONLY);
-    fd_out = open(argv[3], O_CREAT | O_RDWR | O_TRUNC, 0664);
-    dup2(fd_in, 0);
-    dup2(fd_out, 1);
-    first_path = ft_path(env);
-    paths = ft_split(first_path, ':');
-    cmdargs = ft_split(argv[2], ' ');
-    sec_path = ft_access(paths, cmdargs);
-    execve(sec_path, cmdargs, env); */
+    if (argc == 5 )
+        ft_pipex(argv, env);
+    else
+        write(2, "Invalid number of argument", 27);
+}
+

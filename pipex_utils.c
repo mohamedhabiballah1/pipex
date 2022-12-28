@@ -6,7 +6,7 @@
 /*   By: mhabib-a <mhabib-a@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/12/21 11:52:29 by mhabib-a          #+#    #+#             */
-/*   Updated: 2022/12/21 12:42:38 by mhabib-a         ###   ########.fr       */
+/*   Updated: 2022/12/26 13:03:45 by mhabib-a         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,7 +51,10 @@ static char	**ft_free(char **str, int j)
 {
 	j = (j - 1);
 	while(j >= 0)
+	{
 		free(str[j]);
+		j--;
+	}
 	return(NULL);
 }
 
@@ -80,7 +83,7 @@ static char	**lenwords(char const *s, char c, int words, char **str)
 		j++;
 		len = 0;
 	}
-	str[j] = (NULL);
+	str[j] = NULL;
 	return (str);
 }
 
@@ -102,7 +105,6 @@ char	**ft_split(char const *s, char c)
 	}
 	return (str);
 }
-
 int	ft_strncmp(const char *s1, const char *s2, size_t n)
 {
 	size_t	i;
