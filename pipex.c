@@ -47,7 +47,19 @@ void    ft_child(t_list p, char *cmd, char **env)
     close(p.end[0]);
     p.childcmd = ft_split(cmd, ' ');
     p.child_path = ft_access(p.paths, p.childcmd);
-    execve(p.child_path, p.childcmd, env);
+    if (!p.child_path)
+    {
+        free(p.child_path);
+        free(p.childcmd);
+        exit(1);
+        write(2, "Command not found", 18);
+    }
+    else
+    {
+        execve(p.child_path, p.childcmd, env);
+        free(p.child_path);
+        free(p.childcmd);
+    }
 }
 
 void    ft_parent(t_list p, char *cmd, char **env)
@@ -56,7 +68,19 @@ void    ft_parent(t_list p, char *cmd, char **env)
     close(p.end[1]);
     p.parentcmd = ft_split(cmd, ' ');
     p.parent_path = ft_access(p.paths, p.parentcmd);
-    execve(p.child_path, p.childcmd, env);
+    if (!p.parent_path)
+    {
+        free(p.parent_path);
+        free(p.parentcmd);
+        exit(1);
+        write(2, "Command not found", 18);
+    }
+    else
+    {
+        execve(p.parent_path, p.parentcmd, env);
+        free(p.parent_path);
+        free(p.parentcmd);
+    }
 }
 
 void    ft_pipex(char **argv, char **env)
@@ -74,7 +98,7 @@ void    ft_pipex(char **argv, char **env)
     pipe(point.end);
     point.pid = fork();
     if (point.pid < 0)
-        perror("Error");
+        perror("Procces Error");
     else if (point.pid > 0)
         ft_parent(point, argv[3], env);   
     else if (point.pid == 0)
@@ -90,4 +114,3 @@ int main(int argc, char **argv, char **env)
     else
         write(2, "Invalid number of argument", 27);
 }
-
