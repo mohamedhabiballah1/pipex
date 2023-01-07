@@ -33,13 +33,27 @@ typedef struct pipex
     int fd_out; //
     int fd_in; // 
     int end[2]; //
-    pid_t pid;
+    pid_t pid; //
     pid_t pid1; //
 }               t_list;
+
+typedef struct bonus
+{
+    int fd_in;
+    int fd_out;
+    char *path;
+    char **paths;
+    char **cmds;
+    int nmbcmds;
+    int nmbpipes;
+    char *command;
+    int end[1];
+    pid_t   pid;
+}       t_bonus;
 
 char	**ft_split(char const *s, char c);
 int     ft_strncmp(const char *s1, const char *s2, size_t n);
 char	*ft_strjoin(char const *s1, char const *s2);
 size_t	ft_strlen(const char *s);
-
+char    *ft_access(char **paths, char **cmd);
 #endif
