@@ -6,111 +6,53 @@
 /*   By: mhabib-a <mhabib-a@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/12/21 11:33:08 by mhabib-a          #+#    #+#             */
-/*   Updated: 2022/12/28 11:16:57 by mhabib-a         ###   ########.fr       */
+/*   Updated: 2023/01/08 17:17:39 by mhabib-a         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include"pipex.h"
 
-char    *ft_path(char **env)
+void	ft_pipex(t_list point, char **argv, char **env)
 {
-    while(env)
-    {
-        if(ft_strncmp("PATH=", *env, 5) == 0)
-            return(*env+5);
-        env++;
-    }
-    return(NULL);
+	pipe(point.end);
+	point.pid = fork();
+	if (point.pid < 0)
+	{
+		write(2, "Procces PID less than 0", 23);
+		perror("Procces Error");
+		exit(EXIT_FAILURE);
+	}
+	else if (point.pid > 0)
+		ft_parent(point, argv[3], env);
+	else if (point.pid == 0)
+		ft_child(point, argv[2], env);
+    waitpid(point.pid, NULL, 0);
 }
 
-char    *ft_access(char **paths, char **cmd)
+int	main(int argc, char **argv, char **env)
 {
-    char    *str, *str1;
-    int i = 0;
-    while(paths[i])
-    {
-        str = ft_strjoin(paths[i], "/");
-        str1 = ft_strjoin(str, *cmd);
-        free(str);
-        if (access(str1, F_OK) == 0)
-            return(str1);
-        free(str1);
-        i++;
-    }
-    write(2, "No such file or directory", 26);
-    return (NULL);
-}
+	t_list	point;
 
-void    ft_child(t_list p, char *cmd, char **env)
-{
-    dup2(p.end[1], 1);
-    close(p.end[0]);
-    p.childcmd = ft_split(cmd, ' ');
-    p.child_path = ft_access(p.paths, p.childcmd);
-    if (!p.child_path)
-    {
-        free(p.child_path);
-        free(p.childcmd);
-        exit(1);
-        write(2, "Command not found", 18);
-    }
-    else
-    {
-        execve(p.child_path, p.childcmd, env);
-        free(p.child_path);
-        free(p.childcmd);
-    }
-}
-
-void    ft_parent(t_list p, char *cmd, char **env)
-{
-    dup2(p.end[0], 0);
-    close(p.end[1]);
-    p.parentcmd = ft_split(cmd, ' ');
-    p.parent_path = ft_access(p.paths, p.parentcmd);
-    if (!p.parent_path)
-    {
-        free(p.parent_path);
-        free(p.parentcmd);
-        exit(1);
-        write(2, "Command not found", 18);
-    }
-    else
-    {
-        execve(p.parent_path, p.parentcmd, env);
-        free(p.parent_path);
-        free(p.parentcmd);
-    }
-}
-
-void    ft_pipex(char **argv, char **env)
-{
-    t_list point;
-     
-    point.fd_in = open(argv[1], O_CREAT | O_RDWR);
-    point.fd_out = open(argv[4], O_CREAT | O_RDWR | O_TRUNC , 0664);
-    if (point.fd_in < 0 || point.fd_out < 0)
-        write(2, "FD Error", 9);
-    dup2(point.fd_in, 0);
-    dup2(point.fd_out, 1);
-    point.first_path = ft_path(env);
-    point.paths = ft_split(point.first_path, ':');
-    pipe(point.end);
-    point.pid = fork();
-    if (point.pid < 0)
-        perror("Procces Error");
-    else if (point.pid > 0)
-        ft_parent(point, argv[3], env);   
-    else if (point.pid == 0)
-        ft_child(point, argv[2], env);
-    waitpid(point.pid, NULL ,0);
-}
-
-int main(int argc, char **argv, char **env)
-{
-    
-    if (argc == 5 )
-        ft_pipex(argv, env);
-    else
-        write(2, "Invalid number of argument", 27);
+	if (argc == 5)
+	{
+		point.fd_in = open(argv[1], O_CREAT | O_RDWR);
+		point.fd_out = open(argv[4], O_CREAT | O_RDWR | O_TRUNC, 0664);
+		if (point.fd_in < 0 || point.fd_out < 0)
+		{
+			write(2, "FD Error", 9);
+			exit(EXIT_FAILURE);
+		}
+		dup2(point.fd_in, 0);
+		dup2(point.fd_out, 1);
+		point.first_path = ft_path(env);
+		point.paths = ft_split(point.first_path, ':');
+		ft_pipex(point, argv, env);
+		ft_freestr(point.paths);
+		return (0);
+	}
+	else
+	{
+		write(2, "Invalid number of argument", 26);
+		exit(EXIT_FAILURE);
+	}
 }
