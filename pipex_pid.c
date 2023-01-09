@@ -6,7 +6,7 @@
 /*   By: mhabib-a <mhabib-a@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/08 13:24:43 by mhabib-a          #+#    #+#             */
-/*   Updated: 2023/01/08 17:11:26 by mhabib-a         ###   ########.fr       */
+/*   Updated: 2023/01/09 14:59:38 by mhabib-a         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,15 +45,15 @@ char	*ft_access(char **paths, char **cmd)
 
 void	ft_child(t_list p, char *cmd, char **env)
 {
-	dup2(p.end[1], 1);
-	close(p.end[0]);
+	dup2(p.end[0], 0);
+	close(p.end[1]);
 	p.childcmd = ft_split(cmd, ' ');
 	p.child_path = ft_access(p.paths, p.childcmd);
 	if (!p.child_path)
 	{
 		ft_freestr(p.childcmd);
 		ft_freestr(p.paths);
-		write(2, "Command not found", 17);
+		write(2, "command not found", 17);
 		exit(EXIT_FAILURE);
 	}
 	else
@@ -72,15 +72,15 @@ void	ft_child(t_list p, char *cmd, char **env)
 
 void	ft_parent(t_list p, char *cmd, char **env)
 {
-	dup2(p.end[0], 0);
-	close(p.end[1]);
+	dup2(p.end[1], 1);
+	close(p.end[0]);
 	p.parentcmd = ft_split(cmd, ' ');
 	p.parent_path = ft_access(p.paths, p.parentcmd);
 	if (!p.parent_path)
 	{
 		ft_freestr(p.parentcmd);
 		ft_freestr(p.paths);
-		write(2, "Command not found", 17);
+		write(2, "command not found", 17);
 		exit(EXIT_FAILURE);
 	}
 	else
