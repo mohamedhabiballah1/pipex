@@ -6,7 +6,7 @@
 /*   By: mhabib-a <mhabib-a@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/08 13:24:43 by mhabib-a          #+#    #+#             */
-/*   Updated: 2023/01/09 14:59:38 by mhabib-a         ###   ########.fr       */
+/*   Updated: 2023/01/10 14:43:29 by mhabib-a         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,57 +43,57 @@ char	*ft_access(char **paths, char **cmd)
 	return (NULL);
 }
 
-void	ft_child(t_list p, char *cmd, char **env)
+void	ft_child2(t_list p, char *cmd, char **env)
 {
 	dup2(p.end[0], 0);
 	close(p.end[1]);
-	p.childcmd = ft_split(cmd, ' ');
-	p.child_path = ft_access(p.paths, p.childcmd);
-	if (!p.child_path)
+	p.child2cmd = ft_split(cmd, ' ');
+	p.child2_path = ft_access(p.paths, p.child2cmd);
+	if (!p.child2_path)
 	{
-		ft_freestr(p.childcmd);
+		ft_freestr(p.child2cmd);
 		ft_freestr(p.paths);
 		write(2, "command not found", 17);
 		exit(EXIT_FAILURE);
 	}
 	else
 	{
-		if (execve(p.child_path, p.childcmd, env) < 0)
+		if (execve(p.child2_path, p.child2cmd, env) < 0)
 		{
-			free(p.child_path);
-			ft_freestr(p.childcmd);
+			free(p.child2_path);
+			ft_freestr(p.child2cmd);
 			write(2, "Exec error", 10);
 			exit(EXIT_FAILURE);
 		}
-		free(p.child_path);
-		ft_freestr(p.childcmd);
+		free(p.child2_path);
+		ft_freestr(p.child2cmd);
 	}
 }
 
-void	ft_parent(t_list p, char *cmd, char **env)
+void	ft_child1(t_list p, char *cmd, char **env)
 {
 	dup2(p.end[1], 1);
 	close(p.end[0]);
-	p.parentcmd = ft_split(cmd, ' ');
-	p.parent_path = ft_access(p.paths, p.parentcmd);
-	if (!p.parent_path)
+	p.child1cmd = ft_split(cmd, ' ');
+	p.child1_path = ft_access(p.paths, p.child1cmd);
+	if (!p.child1_path)
 	{
-		ft_freestr(p.parentcmd);
+		ft_freestr(p.child1cmd);
 		ft_freestr(p.paths);
 		write(2, "command not found", 17);
 		exit(EXIT_FAILURE);
 	}
 	else
 	{
-		if (execve(p.parent_path, p.parentcmd, env) < 0)
+		if (execve(p.child1_path, p.child1cmd, env) < 0)
 		{
-			free(p.parent_path);
-			ft_freestr(p.parentcmd);
+			free(p.child1_path);
+			ft_freestr(p.child1cmd);
 			write(2, "Exec error", 10);
 			exit(EXIT_FAILURE);
 		}
-		free(p.parent_path);
-		ft_freestr(p.parentcmd);
+		free(p.child1_path);
+		ft_freestr(p.child1cmd);
 	}
 }
 

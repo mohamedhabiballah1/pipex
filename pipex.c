@@ -6,7 +6,7 @@
 /*   By: mhabib-a <mhabib-a@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/12/21 11:33:08 by mhabib-a          #+#    #+#             */
-/*   Updated: 2023/01/09 15:05:03 by mhabib-a         ###   ########.fr       */
+/*   Updated: 2023/01/10 15:19:42 by mhabib-a         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,23 +20,32 @@ void	ft_pipex(t_list point, char **argv, char **env)
 		exit(EXIT_FAILURE);
 	}
 	point.pid = fork();
+	//waitpid(point.pid, NULL, 0);
 	if (point.pid < 0)
 	{
 		write(2, "Procces PID less than 0", 23);
 		perror("Procces Error");
 		exit(EXIT_FAILURE);
 	}
-	else if (point.pid > 0)
-		ft_parent(point, argv[2], env);
 	else if (point.pid == 0)
-		ft_child(point, argv[3], env);
+		ft_child1(point, argv[2], env);
+	point.pid1 = fork();
+	//waitpid(point.pid1, NULL, 0);
+	if (point.pid1 < 0)
+	{
+		write(2, "Procces PID less than 0", 23);
+		perror("Procces Error");
+		exit(EXIT_FAILURE);
+	}
+	else if (point.pid1 == 0)
+		ft_child2(point, argv[3], env);
 	waitpid(point.pid, NULL, 0);
+	waitpid(point.pid1, NULL, 0);
 }
 
 int	main(int argc, char **argv, char **env)
 {
 	t_list	point;
-
 	if (argc == 5)
 	{
 		point.fd_in = open(argv[1], O_RDONLY);
