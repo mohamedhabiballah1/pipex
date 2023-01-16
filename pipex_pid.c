@@ -6,7 +6,7 @@
 /*   By: mhabib-a <mhabib-a@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/01/08 13:24:43 by mhabib-a          #+#    #+#             */
-/*   Updated: 2023/01/10 14:43:29 by mhabib-a         ###   ########.fr       */
+/*   Updated: 2023/01/11 13:52:51 by mhabib-a         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,6 +67,7 @@ void	ft_child2(t_list p, char *cmd, char **env)
 		}
 		free(p.child2_path);
 		ft_freestr(p.child2cmd);
+		exit(EXIT_SUCCESS);
 	}
 }
 
@@ -94,6 +95,7 @@ void	ft_child1(t_list p, char *cmd, char **env)
 		}
 		free(p.child1_path);
 		ft_freestr(p.child1cmd);
+		exit(EXIT_SUCCESS);
 	}
 }
 
